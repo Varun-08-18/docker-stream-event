@@ -1,0 +1,30 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: task-manager
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      - eventstore
+
+  eventstore:
+    image: eventstore/eventstore:lts
+    container_name: eventstore
+    command: --insecure --run-projections=All --enable-atom-pub-over-http
+    environment:
+      EVENTSTORE_INSECURE: "true"
+      EVENTSTORE_RUN_PROJECTIONS: All
+      EVENTSTORE_START_STANDARD_PROJECTIONS: "true"
+      EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP: "true"
+    ports:
+      - "2113:2113"
+    volumes:
+      - eventstore-data:/var/lib/eventstore
+
+volumes:
+  eventstore-data:
